@@ -1,0 +1,98 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'war'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+            exclude('prod', 'dev', 'stage')
+        }
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+repositories {
+//    mavenCentral()
+    maven {
+        url "${nexus_address}"
+    }
+}
+
+jar {
+    baseName = 'sdxd-compass-web'
+    version = '1.0-SNAPSHOT'
+}
+
+configurations.all {
+    exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+
+    // check for updates every build
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    compile(
+            "com.sdxd.balance:sdxd-comp-balance-api:1.0.0-SNAPSHOT",
+            "com.sdxd.common:sdxd-common-api:1.0.4.1-SNAPSHOT",
+            "com.sdxd.common:sdxd-common-redis:1.0-SNAPSHOT",
+            "com.sdxd.file:sdxd-comp-file-api:1.0.1-SNAPSHOT",
+            "com.sdxd.auth:sdxd-comp-auth-api:1.0-SNAPSHOT",
+            "com.sdxd.user:user-api:1.2.0-SNAPSHOT",
+            "com.sdxd.message:sdxd-comp-message-dubbo-api:1.0.6-SNAPSHOT",
+            "com.sdxd.apply:sdxd-comp-apply-api:1.0.3-SNAPSHOT",
+            "com.sdxd.creditline:sdxd-comp-creditline-api:0.0.1-SNAPSHOT",
+            "com.sdxd.product:sdxd-comp-product-api:0.0.1-SNAPSHOT",
+            "com.sdxd.payment:sdxd-comp-payment-api:0.0.1-SNAPSHOT",
+            "com.sdxd.approve:sdxd-comp-approve-api:1.0.3-SNAPSHOT",
+            "com.sdxd.admin:sdxd-comp-admin-api:1.0.5-SNAPSHOT",
+            "com.sdxd.loan:sdxd-comp-loan-api:1.0-SNAPSHOT",
+            "com.sdxd.repayment:sdxd-comp-repayment-dubbo:1.0.2-SNAPSHOT",
+            "com.sdxd.customer:sdxd-comp-customer-api:1.0-SNAPSHOT",
+            "com.sdxd.decision:decision-api:1.1.6-SNAPSHOT",
+            "com.sdxd.cms:sdxd-comp-cms-api:1.0-SNAPSHOT",
+            "com.sdxd.urge:sdxd-comp-urge-api:1.0-SNAPSHOT",
+            "com.sdxd.monitor:sdxd-comp-monitor-api:1.0-SNAPSHOT",
+            "com.sdxd.data:sdxd-comp-data-api:1.0.5-SNAPSHOT",
+            "com.sdxd.job.api:sdxd-comp-job-api:1.0.1-SNAPSHOT",
+            "com.sdxd.auth.etl:sdxd-comp-auth-etl-api:1.0-SNAPSHOT",
+            "com.sdxd.etl:sdxd-comp-etl-api:1.0.1-SNAPSHOT",
+            "com.sdxd.external:sdxd-comp-external-api:1.0.0-SNAPSHOT",
+            "com.sdxd.signature:sdxd-comp-signature-api:1.0.0-SNAPSHOT",
+            "com.itextpdf:itextpdf:5.0.6",
+            "com.itextpdf.tool:xmlworker:5.4.1",
+            "com.sdxd.activities:activities-api:1.0.1-SNAPSHOT",
+            "com.squareup.okhttp3:okhttp:3.8.1",
+            "com.squareup.okhttp3:logging-interceptor:3.8.1"
+    )
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2'
+}
+
+def prodProfiles = 'prod'
+def devProfiles = 'dev'
+def stageProfiles = 'stage'
+def propertyDrivenProfiles;
+
+if (project.hasProperty('prod')) {
+    propertyDrivenProfiles = prodProfiles
+    apply from: rootProject.file('gradle/prod.gradle');
+} else if (project.hasProperty('stage')) {
+    propertyDrivenProfiles = stageProfiles
+    apply from: rootProject.file('gradle/stage.gradle');
+} else {
+    propertyDrivenProfiles = devProfiles
+    apply from: rootProject.file('gradle/dev.gradle');
+}
+println 'Using profile: "' + propertyDrivenProfiles + '" for ' + project.getName()

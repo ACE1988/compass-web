@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <bean id="captchaGenerator" class="com.sdxd.common.web.captcha.CaptchaGenerator">
+        <property name="imageCaptchaService" ref="imageCaptchaService" />
+        <!--<property name="captchaStore" ref="captchaStore" />-->
+    </bean>
+
+    <bean id="imageCaptchaService" class="com.sdxd.common.web.captcha.ImageCaptchaService">
+        <constructor-arg index="0" ref="captchaStore" />
+        <constructor-arg index="1" ref="captchaEngine" />
+        <constructor-arg index="2" value="180" />
+        <constructor-arg index="3" value="100000" />
+        <constructor-arg index="4" value="75000" />
+        <property name="minGuarantedStorageDelayInSeconds" value="30" />
+    </bean>
+    <bean id="captchaEngine" class="com.sdxd.common.web.captcha.engine.CaptchaEngine" />
+    <bean id="captchaStore" class="com.sdxd.common.web.captcha.store.DefaultCaptchaStore">
+        <constructor-arg name="redis" ref="redisClientTemplate"/>
+    </bean>
+
+</beans>
