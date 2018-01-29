@@ -32,7 +32,6 @@ import com.sdxd.decision.api.constants.EventType;
 import com.sdxd.decision.api.request.PolicyRequest;
 import com.sdxd.decision.api.request.PolicyRuleRequest;
 import com.sdxd.decision.api.request.RuleRequest;
-import com.sdxd.external.api.TrafficStorePushDubboService;
 import com.sdxd.framework.dubbo.DubboResponse;
 import com.sdxd.job.api.JobManagerDubboService;
 import com.sdxd.job.api.constants.InterfaceTypeEnum;
@@ -134,9 +133,6 @@ public class SupportController {
 
     @Reference(version = "1.0.0")
     private InviteUserActivityService inviteUserActivityService;
-
-    @Reference(version = "1.0.0")
-    private TrafficStorePushDubboService trafficStorePushDubboService;
 
     @Reference(version = "1.0.0")
     private ApproveTaskDubboService approveTaskDubboService;
@@ -838,28 +834,6 @@ public class SupportController {
 
         DubboResponse<Boolean> res = inviteUserActivityService.rewardUser(req);
         return rest(res);
-    }
-
-
-    @ApiOperation(value = "执行大流超推送任务", notes = "执行大流超推送任务")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/traffic-store/push", method = RequestMethod.POST)
-    @ResponseBody
-    public RestResponse doPushJob(
-            @ApiParam(value = "推送类型, SUMMARY: 统计数据, REJECTED: 被拒用户", allowableValues = "SUMMARY,REJECTED", required = true)
-            @RequestParam("push_type") String pushType
-    ) {
-        if ("SUMMARY".equals(pushType)) {
-            DubboResponse<Boolean> response = trafficStorePushDubboService.triggerSummaryDataPush();
-            return rest(response);
-        } else if ("REJECTED".equals(pushType)) {
-            DubboResponse<Boolean> response = trafficStorePushDubboService.triggerRejectedUserDataPush();
-            return rest(response);
-        }
-        return ok();
     }
 
     @ApiOperation(value = "执行Approve定时任务", notes = "执行Approve定时任务")

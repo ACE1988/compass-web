@@ -2,7 +2,6 @@ package com.sdxd.api.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.google.common.collect.Lists;
-import com.sdxd.api.vo.certification.RequiredCertification;
 import com.sdxd.common.utils.BillNoUtils;
 import com.sdxd.common.web.util.JsonUtil;
 import com.sdxd.common.web.vo.ProcessBizException;
@@ -153,25 +152,6 @@ public class ProfileService {
 //        if (path == null || StringUtils.isBlank(path.getFilePath())) return null;
 //        return new Picture(result.getPhotoCode(), path.getFilePath());
 //    }
-
-    private RequiredCertification getRequiredCertification(Long userId) throws ProcessBizException {
-        UserBaseRequest request = new UserBaseRequest();
-        request.setRequestId(BillNoUtils.GenerateBillNo());
-        request.setUserId(userId);
-        DubboResponse<AuthStatus> response = userAuthService.authStatus(request);
-        AuthStatus status = data(response);
-        UserProfileFaceRecognitionInfo faceInfo = getFaceRecognitionInfo(userId);
-        log.debug("Get certification status for {}: {}", request.getUserId(), JsonUtil.toJson(status));
-        boolean realName = status != null && status.getRealName() == PASSED;
-        boolean identity = status != null && status.getIdentity() == PASSED;
-        boolean face = faceInfo != null && faceInfo.getStatusEnum() == PASSED;
-        boolean residence = status != null && status.getHome() == PASSED;
-        boolean job = status != null && status.getJob() == PASSED;
-        boolean contact = status != null && status.getContact() == PASSED;
-        boolean zhiMa = status != null && status.getZhima() == PASSED;
-        boolean bindCard = isBindCard(userId);
-        return new RequiredCertification(realName, identity, face, residence, job, contact, zhiMa, bindCard);
-    }
 
     public String getZhiMaScore(Long userId) throws ProcessBizException {
         UserBaseRequest request = new UserBaseRequest();

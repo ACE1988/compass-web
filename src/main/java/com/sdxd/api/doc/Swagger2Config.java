@@ -94,37 +94,6 @@ public class Swagger2Config {
     }
 
     @Bean
-    public Docket creditRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2).
-                groupName("credit-api").
-                ignoredParameterTypes(ContextParam.class).
-                securitySchemes(newArrayList(new BasicAuth("test"))).
-                securityContexts(securityContexts()).
-                apiInfo(apiInfo()).
-                select().
-                apis(RequestHandlerSelectors.basePackage("com.sdxd.api.app.credit")).
-                paths(PathSelectors.any()).
-                build().
-                pathMapping("/").directModelSubstitute(Date.class, long.class);
-    }
-
-
-    @Bean
-    public Docket flowRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2).
-                groupName("flow-api").
-                ignoredParameterTypes(ContextParam.class).
-                securitySchemes(newArrayList(new BasicAuth("test"))).
-                securityContexts(securityContexts()).
-                apiInfo(apiInfo()).
-                select().
-                apis(RequestHandlerSelectors.basePackage("com.sdxd.api.app.flow")).
-                paths(PathSelectors.any()).
-                build().
-                pathMapping("/").directModelSubstitute(Date.class, long.class);
-    }
-
-    @Bean
     public Docket customerRestApi() {
         return new Docket(DocumentationType.SWAGGER_2).
                 groupName("customer-api").

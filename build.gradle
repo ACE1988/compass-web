@@ -66,7 +66,7 @@ dependencies {
             "com.sdxd.job.api:sdxd-comp-job-api:1.0.1-SNAPSHOT",
             "com.sdxd.auth.etl:sdxd-comp-auth-etl-api:1.0-SNAPSHOT",
 //            "com.sdxd.etl:sdxd-comp-etl-api:1.0.1-SNAPSHOT",
-            "com.sdxd.external:sdxd-comp-external-api:1.0.0-SNAPSHOT",
+//            "com.sdxd.external:sdxd-comp-external-api:1.0.0-SNAPSHOT",
             "com.sdxd.signature:sdxd-comp-signature-api:1.0.0-SNAPSHOT",
             "com.itextpdf:itextpdf:5.0.6",
             "com.itextpdf.tool:xmlworker:5.4.1",
