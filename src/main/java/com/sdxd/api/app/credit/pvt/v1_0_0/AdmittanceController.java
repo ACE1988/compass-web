@@ -19,10 +19,6 @@ import com.sdxd.common.web.security.Restrict;
 import com.sdxd.common.web.security.Subject;
 import com.sdxd.common.web.vo.ProcessBizException;
 import com.sdxd.common.web.vo.RestResponse;
-import com.sdxd.data.dubbo.api.response.pojo.XDChannelBO;
-import com.sdxd.data.dubbo.api.risk.user.ImageCompareDataDubboService;
-import com.sdxd.data.dubbo.api.risk.user.dto.FaceVerifyResultRequest;
-import com.sdxd.data.dubbo.api.risk.user.dto.FaceVerifyResultResponse;
 import com.sdxd.decision.api.DecisionService;
 import com.sdxd.decision.api.response.RiskHintDetailInfo;
 import com.sdxd.framework.dto.PaginationSupport;
@@ -42,7 +38,6 @@ import java.util.List;
 import static com.sdxd.api.vo.CreditErrors.NO_PARAMETERS;
 import static com.sdxd.common.web.util.ResponseUtil.rest;
 import static com.sdxd.common.web.util.Throwables.toResponse;
-import static com.sdxd.common.web.util.dubbo.DubboLoading.forValue;
 import static com.sdxd.common.web.vo.ErrorCode.ResourceError.CAN_NOT_ACCESS;
 import static com.sdxd.common.web.vo.RestResponse.fail;
 import static com.sdxd.common.web.vo.RestResponse.ok;
@@ -74,9 +69,6 @@ public class AdmittanceController {
     private PagingQuery pagingQuery;
 
     @Reference(version = "1.0.0")
-    private ImageCompareDataDubboService imageCompareDataDubboService;
-
-    @Reference(version = "1.0.0")
     private DecisionService decisionService;
 
     @Autowired
@@ -88,8 +80,6 @@ public class AdmittanceController {
     @Autowired
     private RiskHintService riskHintService;
 
-    @Autowired
-    private ChannelResourceService channelResourceService;
     @Reference(version = "1.0.0")
     private AdminUserGroupDubboService adminUserGroupDubboService;
 
@@ -219,31 +209,6 @@ public class AdmittanceController {
         }
     }
 
-    @ApiOperation(value = "查询数据比对度", notes = "查询数据比对度")
-    @ApiImplicitParams(value = {
-            @ApiImplicitParam(
-                    name = "Authorization",
-                    value = "用户Token",
-                    dataType = "string",
-                    paramType = "header",
-                    example = "Bearer 0b79bab50daca910b000d4f1a2b675d604257e42",
-                    required = true)
-    })
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/comparision", method = RequestMethod.GET)
-    @ResponseBody
-    public RestResponse<FaceVerifyResultResponse> getComparision(
-            @Valid @BeanParam Admittance admittance) {
-        FaceVerifyResultRequest request = new FaceVerifyResultRequest();
-        request.setRequestId(BillNoUtils.GenerateBillNo());
-        request.setAdmittanceId(admittance.getAdmittanceId());
-        DubboResponse<FaceVerifyResultResponse> response = imageCompareDataDubboService.queryFaceVerifyResult(request);
-        return rest(response);
-    }
-
     @ApiOperation(value = "获取决策规则命中信息", notes = "获取决策规则命中信息")
     @ApiImplicitParams(value = {
             @ApiImplicitParam(
@@ -277,67 +242,6 @@ public class AdmittanceController {
             return e.toResult();
         } catch (RuntimeException e) {
             return toResponse(e);
-        }
-    }
-
-//    @ApiOperation(value = "获取决策规则命中信息", notes = "获取决策规则命中信息")
-//    @ApiImplicitParams(value = {
-//            @ApiImplicitParam(
-//                    name = "Authorization",
-//                    value = "用户Token",
-//                    dataType = "string",
-//                    paramType = "header",
-//                    example = "Bearer 0b79bab50daca910b000d4f1a2b675d604257e42",
-//                    required = true)
-//    })
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-//            @ApiResponse(code = 500, message = "服务器不能完成请求")
-//    })
-//    @RequestMapping(value = "/{id}/rules-hit", method = RequestMethod.GET)
-//    @ResponseBody
-//    public RestResponse<List<RuleInfo>> getRulesHitOld(
-//            @ApiParam(value = "准入申请编号", required = true) @PathVariable(value = "id") String admittanceId
-//    ) {
-//        RulesHitRequest request = new RulesHitRequest();
-//        request.setRequestId(BillNoUtils.GenerateBillNo());
-//        request.setSourceId(admittanceId);
-//        DubboResponse<List<RuleInfo>> response = decisionService.queryRulesHit(request);
-//        return rest(response);
-//    }
-
-    @ApiOperation(value = "注册来源查询", notes = "注册来源查询")
-    @ApiImplicitParams(value = {
-            @ApiImplicitParam(
-                    name = "Authorization",
-                    value = "用户Token",
-                    dataType = "string",
-                    paramType = "header",
-                    example = "Bearer 0b79bab50daca910b000d4f1a2b675d604257e42",
-                    required = true)
-    })
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/channel-resource", method = RequestMethod.GET)
-    @ResponseBody
-    public RestResponse<PaginationSupport<XDChannelBO>> getChanelResources(
-            @BeanParam ChannelResourceQuery query
-    ) {
-        try {
-            PaginationSupport<XDChannelBO> page =
-                    forValue(new PaginationSupport<XDChannelBO>(null, 0)).
-                            parallel(() -> channelResourceService.getChannelResource(query), (p1, p2) -> {
-                                p1.setList(p2 == null ? null : p2.getList());
-                                p1.setCurrentIndex(p2 == null ? 0 : p2.getCurrentIndex());
-                                p1.setPageSize(p2 == null ? 0 : p2.getPageSize());
-                            }).
-                            parallel(() -> channelResourceService.countChannelResource(query), PaginationSupport::setTotalCount).
-                            start();
-            return ok(page);
-        } catch (ProcessBizException e) {
-            return e.toResult();
         }
     }
 }

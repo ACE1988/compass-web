@@ -125,21 +125,6 @@ public class Swagger2Config {
     }
 
     @Bean
-    public Docket lendingRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2).
-                groupName("lending-api").
-                ignoredParameterTypes(ContextParam.class).
-                securitySchemes(newArrayList(new BasicAuth("test"))).
-                securityContexts(securityContexts()).
-                apiInfo(apiInfo()).
-                select().
-                apis(RequestHandlerSelectors.basePackage("com.sdxd.api.app.lending")).
-                paths(PathSelectors.any()).
-                build().
-                pathMapping("/").directModelSubstitute(Date.class, long.class);
-    }
-
-    @Bean
     public Docket customerRestApi() {
         return new Docket(DocumentationType.SWAGGER_2).
                 groupName("customer-api").
@@ -179,21 +164,6 @@ public class Swagger2Config {
                 apiInfo(apiInfo()).
                 select().
                 apis(RequestHandlerSelectors.basePackage("com.sdxd.api.app.utilities")).
-                paths(PathSelectors.any()).
-                build().
-                pathMapping("/").directModelSubstitute(Date.class, long.class);
-    }
-
-    @Bean
-    public Docket crmRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2).
-                groupName("crm-api").
-                ignoredParameterTypes(ContextParam.class).
-                securitySchemes(newArrayList(new BasicAuth("test"))).
-                securityContexts(securityContexts()).
-                apiInfo(apiInfo()).
-                select().
-                apis(RequestHandlerSelectors.basePackage("com.sdxd.api.app.crm")).
                 paths(PathSelectors.any()).
                 build().
                 pathMapping("/").directModelSubstitute(Date.class, long.class);

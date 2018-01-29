@@ -2,7 +2,6 @@ package com.sdxd.api.app.credit.pvt.v1_0_0;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.sdxd.api.service.ProfileService;
-import com.sdxd.api.service.RepaymentOfflineDetailService;
 import com.sdxd.api.util.IncreaseLineHistoryBatchImportOfflineUtil;
 import com.sdxd.api.vo.credit.IncreaseLineHistory;
 import com.sdxd.api.vo.credit.IncreaseLineHistoryDetail;
@@ -54,9 +53,6 @@ import static com.sdxd.common.web.vo.RestResponse.ok;
 public class IncreaseLineController {
 
     private static final Logger log = LoggerFactory.getLogger(IncreaseLineController.class);
-
-    @Autowired
-    private RepaymentOfflineDetailService repaymentOfflineDetailService;
 
     @Autowired
     private ProfileService profileService;

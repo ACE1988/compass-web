@@ -20,7 +20,7 @@ import java.util.List;
  * Created by lenovo on 2017/7/21.
  */
 public class AccountCodeBatchImportOfflineUtil extends Spreadsheet {
-    private Logger logger = LoggerFactory.getLogger(RepaymentOfflinePrivateUtil.class);
+    private Logger logger = LoggerFactory.getLogger(AccountCodeBatchImportOfflineUtil.class);
 
     public AccountCodeBatchImportOfflineUtil(InputStream in, String type) {
         super(in, Type.forType(type));

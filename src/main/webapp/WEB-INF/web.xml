@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 		  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          id="sdxd" version="3.0" metadata-complete="true">
-    <display-name>sdxd-api-web</display-name>
+    <display-name>sdxd-compass-web</display-name>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>

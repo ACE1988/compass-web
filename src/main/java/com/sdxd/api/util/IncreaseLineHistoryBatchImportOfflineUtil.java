@@ -24,7 +24,7 @@ import static com.sdxd.common.web.trace.HttpTracer.DEBUG;
  */
 
 public class IncreaseLineHistoryBatchImportOfflineUtil extends Spreadsheet {
-    private Logger logger = LoggerFactory.getLogger(RepaymentOfflinePrivateUtil.class);
+    private Logger logger = LoggerFactory.getLogger(IncreaseLineHistoryBatchImportOfflineUtil.class);
 
     public IncreaseLineHistoryBatchImportOfflineUtil(InputStream in, String type) {
         super(in, Type.forType(type));

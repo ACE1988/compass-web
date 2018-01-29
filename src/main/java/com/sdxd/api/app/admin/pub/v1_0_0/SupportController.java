@@ -32,7 +32,6 @@ import com.sdxd.decision.api.constants.EventType;
 import com.sdxd.decision.api.request.PolicyRequest;
 import com.sdxd.decision.api.request.PolicyRuleRequest;
 import com.sdxd.decision.api.request.RuleRequest;
-import com.sdxd.etl.dubbo.api.JobDubboService;
 import com.sdxd.external.api.TrafficStorePushDubboService;
 import com.sdxd.framework.dubbo.DubboResponse;
 import com.sdxd.job.api.JobManagerDubboService;
@@ -51,9 +50,6 @@ import com.sdxd.pay.api.P2PUserDubboService;
 import com.sdxd.pay.api.PaymentDubboService;
 import com.sdxd.pay.enums.PayChannel;
 import com.sdxd.pay.request.DkQueryRequest;
-import com.sdxd.repayment.dubbo.RepaymentContractDubboService;
-import com.sdxd.repayment.dubbo.SignatureTaskDubbo;
-import com.sdxd.repayment.dubbo.request.ApplyidRequest;
 import com.sdxd.signature.api.SignatureDubboService;
 import com.sdxd.signature.api.request.IssueCertRequest;
 import com.sdxd.urge.dubbo.api.PullOverDataDubboService;
@@ -66,13 +62,6 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -147,9 +136,6 @@ public class SupportController {
     private InviteUserActivityService inviteUserActivityService;
 
     @Reference(version = "1.0.0")
-    private JobDubboService jobDubboService;
-
-    @Reference(version = "1.0.0")
     private TrafficStorePushDubboService trafficStorePushDubboService;
 
     @Reference(version = "1.0.0")
@@ -161,27 +147,8 @@ public class SupportController {
     @Reference(version = "1.0.0")
     private SignatureDubboService signatureDubboService;
 
-    @Reference(version = "1.0.0")
-    private RepaymentContractDubboService repaymentContractDubboService;
-
     @Autowired
     private ProfileService profileService;
-
-    @Reference(version = "1.0.0")
-    private SignatureTaskDubbo signatureTaskDubbo;
-
-    @ApiOperation(value = "补逾期分期的签章", notes = "补逾期分期的签章")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/sign-overdue/installment-contract", method = RequestMethod.GET)
-    @ResponseBody
-    public RestResponse<Boolean> signOverdueInstallmentContract() {
-        DubboResponse<Boolean> response = signatureTaskDubbo.signOverdueInstallmentContractPlus();
-        return rest(response);
-    }
-
 
     @ApiOperation(value = "解绑指定卡号银行卡", notes = "解绑指定卡号银行卡")
     @ApiResponses(value = {
@@ -873,46 +840,6 @@ public class SupportController {
         return rest(res);
     }
 
-    @ApiOperation(value = "执行任务", notes = "执行任务")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/task/execution", method = RequestMethod.POST)
-    @ResponseBody
-    public RestResponse doJob(
-            @ApiParam(value = "任务类型", defaultValue = "CHANNEL_JOB", required = true) @RequestParam("type") String type,
-            @ApiParam(value = "时间类型", allowableValues = "TODAY, YESTERDAY, CUSTOM", required = true)
-            @RequestParam("time_type") String timeType,
-            @ApiParam(value = "起始时间") @RequestParam(value = "from", required = false) Date startTime,
-            @ApiParam(value = "结束时间") @RequestParam(value = "to", required = false) Date endTime
-    ) {
-        com.sdxd.etl.dubbo.api.request.JobRequest request = new com.sdxd.etl.dubbo.api.request.JobRequest();
-
-        Date from = startTime;
-        Date to = endTime;
-        if ("TODAY".equals(timeType)) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-            ZonedDateTime zonedDateStart = zonedDateTime.toLocalDate().atStartOfDay(ZoneId.systemDefault());
-            ZonedDateTime zonedDateEnd = zonedDateTime.toLocalDateTime().with(LocalTime.MAX).atZone(ZoneId.systemDefault());
-            from = Date.from(zonedDateStart.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant());
-            to = Date.from(zonedDateEnd.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant());
-        } else if ("YESTERDAY".equals(timeType)) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-            zonedDateTime = zonedDateTime.minusDays(1);
-            ZonedDateTime zonedDateStart = zonedDateTime.toLocalDate().atStartOfDay(ZoneId.systemDefault());
-            ZonedDateTime zonedDateEnd = zonedDateTime.toLocalDateTime().with(LocalTime.MAX).atZone(ZoneId.systemDefault());
-            from = Date.from(zonedDateStart.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant());
-            to = Date.from(zonedDateEnd.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant());
-        }
-
-        request.setRequestId(BillNoUtils.GenerateBillNo());
-        request.setType(type);
-        request.setStartTime(from);
-        request.setEndTime(to);
-        DubboResponse<Boolean> response = jobDubboService.run(request);
-        return rest(response);
-    }
 
     @ApiOperation(value = "执行大流超推送任务", notes = "执行大流超推送任务")
     @ApiResponses(value = {
@@ -991,21 +918,6 @@ public class SupportController {
         } catch (ProcessBizException e) {
             return e.toResult();
         }
-    }
-
-    @ApiOperation(value = "逾期分期协议签章", notes = "逾期分期协议签章")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful — 请求已完成"),
-            @ApiResponse(code = 500, message = "服务器不能完成请求")
-    })
-    @RequestMapping(value = "/overdue-installment-contract-signature", method = RequestMethod.POST)
-    @ResponseBody
-    public RestResponse issueCert(@RequestParam("apply_id") String applyId) {
-        ApplyidRequest request = new ApplyidRequest();
-        request.setRequestId(BillNoUtils.GenerateBillNo());
-        request.setApplyId(applyId);
-        DubboResponse<Boolean> response = repaymentContractDubboService.signOverdueInstallmentContract(request);
-        return rest(response);
     }
 
 }

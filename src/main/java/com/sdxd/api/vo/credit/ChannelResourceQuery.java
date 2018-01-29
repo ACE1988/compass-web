@@ -1,11 +1,9 @@
 package com.sdxd.api.vo.credit;
 
-import com.sdxd.api.vo.lending.RepaymentStatus;
 import com.sdxd.common.web.vo.PageParameter;
 import io.swagger.annotations.ApiParam;
 
 import javax.ws.rs.QueryParam;
-import java.util.Date;
 
 /**
  * *****************************************************************************
